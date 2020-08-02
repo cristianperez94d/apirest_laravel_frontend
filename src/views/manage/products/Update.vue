@@ -48,7 +48,7 @@
 
       <div class="form-group">
         <label for="">Subcategoria</label>
-        <input class="form-control" type="text" v-model="subcategoria">
+        <input class="form-control" type="text" v-model="subcategoria" @click="showModalViewSubcategories()">
       </div>
 
       <div class="alert alert-info" v-if="info">
@@ -67,6 +67,7 @@
       </div>
 
       <button type="submit" class="btn btn-success btn-block mb-3">Editar</button>
+      <button type="button" class="btn btn-secondary btn-block mb-3" @click="cancelUpdate()">Cancelar</button>
 
     </form>
 
@@ -121,10 +122,42 @@
 
     </b-modal>
 
+    <!-- Modal View Subcategories -->
+    <b-modal
+    id="modal-subcategories-view"
+    ref="my-modal"
+    hide-footer
+    title="Listado"
+    @hide=hideModalViewSubcategories
+    >
+
+      <h3>Lista de Subcategorias</h3>
+      <!-- Subcategories -->
+      <div class="alert alert-info" v-if="subcategories.loading">
+        Cargando subcategorias...
+      </div>
+      <b-form-group label="Seleccione una:" v-if="!subcategories.loading">
+        <b-form-radio-group
+          v-model="selected"
+          :options="options"
+          name="radios-stacked"
+          stacked
+        ></b-form-radio-group>
+      </b-form-group>
+
+      <div class="text-center">
+        <button class="btn btn-success w-50" @click="selectedSubcategory()">Aceptar</button>
+      </div>
+
+    </b-modal>
+
+
+
   </div>
 </template>
 
 <script>
+import router from '@/router';
 import { mapState, mapMutations, mapGetters } from 'vuex';
 export default {
   data() {
@@ -149,7 +182,16 @@ export default {
         data: [],
         total: 0,
         loading: false,
-      }
+      },
+      // Modal Subcategories
+      selected: '',
+      options: [
+        { text: '', value: '' },
+      ],
+      subcategories:{
+        data: [],
+        loading: false,
+      },
       
     }
   },
@@ -159,6 +201,9 @@ export default {
   },
   methods: {
     ...mapMutations(['setLoading']),
+    cancelUpdate(){
+      router.back();
+    },
     setProduct(product){
       if(product){
         this.identificador = product.identificador;
@@ -304,6 +349,45 @@ export default {
     },
     hideModalViewPhotos(){
       this.$bvModal.hide('modal-photo-view');
+    },
+    // Modal view Subcategories
+    consultSubcategories(){
+      this.subcategories.loading = true;
+      let config = {
+        headers: {
+          'Accept': 'application/json',
+        }
+      }
+      fetch(`${this.URL_SERVER}api/subcategories?per_page=50`,config)
+      .then(res => res.json() )
+      .then(res => {
+        // console.log(res);
+        if(res.total){
+          this.subcategories.data = res.data;
+          this.setOptions();
+        }
+        this.subcategories.loading = false;
+      });
+    },
+    setOptions(){
+      if(this.subcategories.data.length > 0){
+        this.options = [];
+        for (const subcategory of this.subcategories.data) {
+          this.options.push({text: subcategory.nombre , value: subcategory.identificador});
+        }
+
+      }
+    },
+    selectedSubcategory(valor){
+      this.subcategoria = this.selected
+      this.hideModalViewSubcategories();
+    },
+    showModalViewSubcategories(){
+      this.$bvModal.show('modal-subcategories-view');
+      this.consultSubcategories();
+    },
+    hideModalViewSubcategories(){
+      this.$bvModal.hide('modal-subcategories-view');
     },
 
   },

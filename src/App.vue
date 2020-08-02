@@ -23,9 +23,9 @@
 
               <!-- Administrador -->
               <b-nav-item-dropdown text="Gestion" right v-if="session && user.admin===1">
-                <b-dropdown-item href="#">Categorias</b-dropdown-item>
+                <b-dropdown-item :to="{name: 'ManageCategoriesInsert'}">Categorias</b-dropdown-item>
                 <b-dropdown-item :to="{name: 'ManageProducts'}">Productos</b-dropdown-item>
-                <b-dropdown-item href="#">Subcategorias</b-dropdown-item>
+                <b-dropdown-item :to="{name: 'ManageSubcategoriesInsert'}">Subcategorias</b-dropdown-item>
                 <b-dropdown-item :to="{name: 'ManageUsers'}">Usuarios</b-dropdown-item>
               </b-nav-item-dropdown>
 

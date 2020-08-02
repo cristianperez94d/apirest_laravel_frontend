@@ -12,11 +12,6 @@ Vue.use(VueRouter)
     component: Home
   },
   {
-    path: '/about',
-    name: 'About',
-    component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
-  },
-  {
     path: '/iniciar-sesion',
     name: 'Login',
     component: () => import('../views/user/Login.vue')
@@ -50,6 +45,7 @@ Vue.use(VueRouter)
     component: () => import('../views/manage/users/Users.vue'),
     meta: { requiresAuth: true , requiresAdmin: true}
   },
+  // ROUTE ADMINISTRATOR FOR PRODUCTS
   {
     path: '/getion/productos',
     name: 'ManageProducts',
@@ -66,6 +62,20 @@ Vue.use(VueRouter)
     path: '/getion/productos-nuevo',
     name: 'ManageProductsInsert',
     component: () => import('../views/manage/products/Insert.vue'),
+    meta: { requiresAuth: true , requiresAdmin: true}
+  },
+  // ROUTE ADMINISTRATOR FOR SUBCATEGORIES
+  {
+    path: '/getion/subcategorias-nuevo',
+    name: 'ManageSubcategoriesInsert',
+    component: () => import('../views/manage/subcategories/Insert.vue'),
+    meta: { requiresAuth: true , requiresAdmin: true}
+  },
+  // ROUTE ADMINISTRATOR FOR CATEGORIES
+  {
+    path: '/getion/categorias-nuevo',
+    name: 'ManageCategoriesInsert',
+    component: () => import('../views/manage/categories/Insert.vue'),
     meta: { requiresAuth: true , requiresAdmin: true}
   },
 

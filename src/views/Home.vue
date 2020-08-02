@@ -21,13 +21,16 @@
           <p class="card-text text-truncate">
             {{product.descripcion}}
           </p>
-          {{product.precio}}
+                    
+          <!-- Currency -->
           <p class="text-center h2 text-danger">$ {{convertCurrency(product.precio)}}</p>
           <p class="text-center">
             {{textCurrency}}
           </p>
-          
-          <router-link class="btn btn-outline-info btn-block" :to="{name:'ProductDetails', params: {'id':product.identificador}}">Ver detalles</router-link>
+
+          <div class="container">
+            <router-link class="btn btn-outline-info btn-block" :to="{name:'ProductDetails', params: {'id':product.identificador}}">Ver detalles</router-link>
+          </div>
           
         </b-card>
 
