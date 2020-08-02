@@ -1,41 +1,61 @@
 <template>
-  <div class="container-fluid mt-3">
-    <HelloWorld msg="Lista General de Productos"/>
+  <div class="container-fluid">
+    <h1 class="text-center mt-3">Gestion de Productos</h1>
+    <div class="text-center">
+      <router-link class="btn btn-success m-3 w-50" :to="{name:'ManageProductsInsert'}">Nuevo</router-link>
+    </div>
+
     <div class="alert alert-info" v-if="getLoading">
       Cargando...
     </div>
+
+    <!-- Alert delete -->
+    <b-alert show dismissible variant="info" v-if="info">
+      {{info}}      
+    </b-alert>
+    <!-- Alert delete error -->
+    <b-alert show dismissible variant="danger" v-if="errors">
+      {{errors}}
+    </b-alert>
+
+    <!-- table products -->
+    <div v-if="products.total">    
     
-    <div id="" class="row row-cols-1 row-cols-sm-2 row-cols-md-4 m-1 justify-content-center" v-if="products.total">
-      
-      <div v-for="product of products.data" :key="product.identificador">
-        
-        <b-card
-          :title="product.nombre"
-          :img-src="URL_SERVER+product.foto"
-          img-alt="Image"
-          img-top
-          tag="article"
-          style="max-width: 20rem;"
-          class="mb-2 mr-1 col h-100"
-        >
-          <p class="card-text text-truncate">
-            {{product.descripcion}}
-          </p>
-          {{product.precio}}
-          <p class="text-center h2 text-danger">$ {{convertCurrency(product.precio)}}</p>
-          <p class="text-center">
-            {{textCurrency}}
-          </p>
-          
-          <router-link class="btn btn-outline-info btn-block" :to="{name:'ProductDetails', params: {'id':product.identificador}}">Ver detalles</router-link>
-          
-        </b-card>
+      <table class="table">
+        <thead>
+          <tr class="text-center">
+            <th scope="col">identificador</th>
+            <th scope="col">nombre</th>
+            <th scope="col">descripcion</th>
+            <th scope="col">peso</th>
+            <th scope="col">precio</th>
+            <th scope="col">foto</th>
+            <th scope="col">subcategoria</th>
+            <th scope="col">acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="text-center" v-for="product of products.data" :key="product.identificador">
+            <th scope="row">{{product.identificador}}</th>
+            <td>{{product.nombre}}</td>
+            <td>{{product.descripcion}}</td>
+            <td>{{product.peso}}</td>
+            <td>{{product.precio}}</td>
+            
+            <td>
+              <img :src="`${URL_SERVER+product.foto}`" style="maxWidth: 100px" alt="">
+            </td>
+            <td>{{product.subcategoria}}</td>
+            <td>
+              <router-link class="btn btn-warning btn-sm m-2" :to="{name: 'ManageProductsUpdate', params:{'id':product.identificador}}">Editar</router-link>
+              <button class="btn btn-danger btn-sm mr-2 mt-2 mb-2"  @click="deleteProduct(product.identificador)">Eliminar</button> 
+            </td>
 
-      </div>
+          </tr>
+        </tbody>
+      </table>
 
-    </div>
-
-    <nav aria-label="Page navigation">
+      <nav aria-label="Page navigation">
         <ul class="pagination">
 
           <li class="page-item" :class="{'disabled': !prevPage}">
@@ -60,23 +80,18 @@
         </ul>
         <span>Pagina: {{products.current_page}} de {{products.last_page}}</span>
       </nav>
-
+    </div>
+    
   </div>
 </template>
-
 <script>
-// @ is an alias to /src
-import HelloWorld from '@/components/HelloWorld.vue'
-import { mapState, mapGetters, mapMutations, mapActions } from 'vuex'
-
+import { mapGetters, mapState, mapMutations } from 'vuex'
 export default {
-  name: 'Home',
-  components: {
-    HelloWorld
-  },
   data() {
     return {
-      products:{
+      info: '',
+      errors: '',
+      products: {
         data: [],
         current_page: 0,
         last_page: 0,
@@ -85,7 +100,6 @@ export default {
         links: {}
       },
       offset:2,
-
     }
   },
   watch:{
@@ -96,10 +110,10 @@ export default {
         this.consultProducts(pagina);
       }
     }
-  },
-  computed: {
+  },  
+  computed:{
     ...mapState(['token', 'user', 'session','URL_SERVER']),
-    ...mapGetters(['getLoading','getCurrency','textCurrency']),
+    ...mapGetters(['getLoading','getToken']),
     prevPage(){
       return this.products.current_page ? this.products.current_page-1 : 0
     },
@@ -155,15 +169,33 @@ export default {
         this.setLoading(false);
       });
     },
-    convertCurrency(valor){
-      if(this.getCurrency.dollar){
-        let dollarValue = this.getCurrency.dollarValue;
-        return (valor/dollarValue).toFixed(2);
-      }
-      return valor;
-    },
-  }
-  
+    deleteProduct(id){
+      console.log(id);
+      this.setLoading(true);
+      this.info = '';
+      this.errors= '';
 
+      let config = {
+        method: 'delete',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${this.getToken}`
+        },
+      }
+      fetch(`${this.URL_SERVER}api/products/${id}`, config)
+      .then(res => res.json())
+      .then(res => {
+        if(res.success){
+          this.info = res.success;
+          let index = this.products.data.findIndex(element => element.identificador === id);
+          this.products.data.splice(index,1);
+        }
+        else{
+          this.errors = res.error;
+        }
+        this.setLoading(false);
+      });
+    }
+  }
 }
 </script>
