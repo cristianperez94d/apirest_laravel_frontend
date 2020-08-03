@@ -1,10 +1,14 @@
 <template>
   <div class="container-fluid mt-3">
-    <HelloWorld msg="Lista General de Productos"/>
+    <button class="btn btn-warning float-right " @click="showModalViewFilters()">Filtros</button>
+    <HelloWorld msg="Lista General de Productos" class="mb-3"/>
     <div class="alert alert-info" v-if="getLoading">
       Cargando...
     </div>
-    
+    {{selectedItemPerPage}}
+    {{'per-page: '+perPage}}
+    {{selectedOrderBy}}
+    {{'orderBy: '+orderBy}}
     <div id="" class="row row-cols-1 row-cols-sm-2 row-cols-md-4 m-1 justify-content-center" v-if="products.total">
       
       <div v-for="product of products.data" :key="product.identificador">
@@ -64,6 +68,42 @@
       <span>Pagina: {{products.current_page}} de {{products.last_page}}</span>
     </nav>
 
+    <!-- Modal View Filters -->
+    <b-modal
+    id="modal-filters-view"
+    ref="my-modal"
+    hide-footer
+    title="Filtros"
+    @hide=hideModalViewFilters
+    >
+
+      <h3>Lista de filtros</h3>
+      <!-- Filters -->
+      <!-- Filter items per page  -->
+      <b-form-group label="¿Numero de productos por Pagina?">
+        <b-form-radio-group
+          v-model="selectedItemPerPage"
+          :options="itemsPerPage"
+          name="radios-stacked"
+          stacked
+        ></b-form-radio-group>
+      </b-form-group>
+      <!-- Filter order By -->
+      <b-form-group label="¿Ordenar productos:?">
+        <b-form-radio-group
+          v-model="selectedOrderBy"
+          :options="itemsOrderBy"
+          name="radios-Order-By"
+          stacked
+        ></b-form-radio-group>
+      </b-form-group>
+
+      <div class="text-center">
+        <button type="button" class="btn btn-success w-50" @click="saveFilters()">Aceptar</button>
+      </div>
+
+    </b-modal>
+    
   </div>
 </template>
 
@@ -88,6 +128,23 @@ export default {
         links: {}
       },
       offset:2,
+      // Modal filters
+      selectedItemPerPage: 10,
+      itemsPerPage: [
+        { text: '5 Productos por Pagina', value: 5 },
+        { text: '10 Productos por Pagina', value: 10 },
+        { text: '15 Productos por Pagina', value: 15 },
+        { text: '25 Productos por Pagina', value: 25 },
+        { text: '50 Productos por Pagina', value: 50 },
+      ],
+      selectedOrderBy: '',
+      itemsOrderBy: [
+        { text: 'ordenar por precio', value: 'sort_by=precio' },
+        { text: 'ordenar por nombre', value: 'sort_by=nombre' },
+      ],
+      // filters
+      perPage: 10,
+      orderBy: ''
 
     }
   },
@@ -145,7 +202,7 @@ export default {
           'Accept': 'apliccatioon/json',
         }
       }
-      fetch(`${this.URL_SERVER}api/products?page=${pagina}`)
+      fetch(`${this.URL_SERVER}api/products?page=${pagina}&per_page=${this.perPage}&${this.orderBy}`)
       .then(res => res.json())
       .then(res => {
         this.products.data = res.data;
@@ -165,7 +222,19 @@ export default {
       }
       return valor;
     },
-  }
+    saveFilters(){
+      this.perPage = this.selectedItemPerPage;
+      this.orderBy = this.selectedOrderBy; 
+      this.consultProducts(1);
+      this.hideModalViewFilters();
+    },
+    showModalViewFilters(){
+      this.$bvModal.show('modal-filters-view');
+    },
+    hideModalViewFilters(){
+      this.$bvModal.hide('modal-filters-view');
+    },
+  },
   
 
 }
