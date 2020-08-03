@@ -5,10 +5,7 @@
     <div class="alert alert-info" v-if="getLoading">
       Cargando...
     </div>
-    {{selectedItemPerPage}}
-    {{'per-page: '+perPage}}
-    {{selectedOrderBy}}
-    {{'orderBy: '+orderBy}}
+    
     <div id="" class="row row-cols-1 row-cols-sm-2 row-cols-md-4 m-1 justify-content-center" v-if="products.total">
       
       <div v-for="product of products.data" :key="product.identificador">
