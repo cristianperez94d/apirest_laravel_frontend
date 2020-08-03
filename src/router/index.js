@@ -27,6 +27,16 @@ Vue.use(VueRouter)
     component: () => import('../views/ProductDetails.vue')
   },
   {
+    path: '/categoria/:id-:name',
+    name: 'CategorySubcategories',
+    component: () => import('../views/CategorySubcategories.vue')
+  },
+  {
+    path: '/subcategoria/:id-:name',
+    name: 'SubcategoryProducts',
+    component: () => import('../views/SubcategoryProducts.vue')
+  },
+  {
     path: '*',
     name: 'Error',
     component: () => import('../views/Error.vue')

@@ -1,10 +1,12 @@
 <template>
-  <div class="container-fluid mt-3">
-    <HelloWorld msg="Lista General de Productos"/>
-    <div class="alert alert-info" v-if="getLoading">
-      Cargando...
+  <div class="container-fluid">
+
+    <h1 class="text-center mt-3">{{$route.params.name}}</h1>
+
+    <div class="alert alert-info" v-if="products.loading">
+      Cargando productos...
     </div>
-    
+
     <div id="" class="row row-cols-1 row-cols-sm-2 row-cols-md-4 m-1 justify-content-center" v-if="products.total">
       
       <div v-for="product of products.data" :key="product.identificador">
@@ -37,7 +39,7 @@
       </div>
 
     </div>
-
+    
     <nav aria-label="Page navigation">
       <ul class="pagination">
 
@@ -68,30 +70,24 @@
 </template>
 
 <script>
-// @ is an alias to /src
-import HelloWorld from '@/components/HelloWorld.vue'
-import { mapState, mapGetters, mapMutations, mapActions } from 'vuex'
-
+import { mapState, mapGetters } from 'vuex';
 export default {
-  name: 'Home',
-  components: {
-    HelloWorld
-  },
+  name: 'SubcategoryProducts',
   data() {
     return {
       products:{
-        data: [],
+        data:[],
         current_page: 0,
         last_page: 0,
         per_page: 0,
         total: 0,
-        links: {}
+        links: {},
+        loading:false,
       },
       offset:2,
-
     }
   },
-  watch:{
+    watch:{
     "$route.query.pagina": {
       immediate: true,
       handler(pagina){
@@ -101,9 +97,13 @@ export default {
     }
   },
   computed: {
-    ...mapState(['token', 'user', 'session','URL_SERVER']),
-    ...mapGetters(['getLoading','getCurrency','textCurrency']),
-    prevPage(){
+    ...mapState(['URL_SERVER']),
+    ...mapGetters(['getCurrency','textCurrency']),
+    verifyChangeCategory(){
+      let id = this.$route.params.id;
+      this.consultProducts(id);
+    },
+       prevPage(){
       return this.products.current_page ? this.products.current_page-1 : 0
     },
     nextPage(){      
@@ -135,27 +135,26 @@ export default {
     }
   },
   methods:{
-    ...mapMutations(['setLoading']),
     consultProducts(pagina){
-
-      this.setLoading(true);
+      this.products.data = [];
+      this.products.loading = true;
       let config = {
-        method: 'get',
-        headers:{
-          'Accept': 'apliccatioon/json',
+        headers: {
+          'Accept': 'application/json',
         }
       }
-      fetch(`${this.URL_SERVER}api/products?page=${pagina}`)
-      .then(res => res.json())
+      fetch(`${this.URL_SERVER}api/subcategories/${this.$route.params.id}/products?page=${pagina}`,config)
+      .then(res => res.json() )
       .then(res => {
-        this.products.data = res.data;
-        this.products.current_page = res.current_page;
-        this.products.last_page = res.last_page;
-        this.products.per_page = res.per_page;
-        this.products.total = res.total;
-        this.products.links = res.links;
-
-        this.setLoading(false);
+        if(res.data.length > 0){
+          this.products.data = res.data;
+          this.products.current_page = res.current_page;
+          this.products.last_page = res.last_page;
+          this.products.per_page = res.per_page;
+          this.products.total = res.total;
+          this.products.links = res.links;
+        }
+        this.products.loading = false;
       });
     },
     convertCurrency(valor){
@@ -165,8 +164,7 @@ export default {
       }
       return valor;
     },
-  }
-  
 
+  },
 }
 </script>

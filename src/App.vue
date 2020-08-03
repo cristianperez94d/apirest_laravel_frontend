@@ -15,10 +15,12 @@
               <b-nav-item :to="{name: 'Home'}">Inicio</b-nav-item>
 
               <b-nav-item-dropdown text="Categorias" right>
-                <b-dropdown-item href="#">Tecnologia</b-dropdown-item>
-                <b-dropdown-item href="#">Hogar</b-dropdown-item>
-                <b-dropdown-item href="#">Vestuario</b-dropdown-item>
-                <b-dropdown-item href="#">Deportes</b-dropdown-item>
+                <b-dropdown-item :to="{name: 'CategorySubcategories', params:{ name: category.nombre, id:category.identificador}}" v-for="category of getCategories.data" :key="category.identificador">
+                  
+                  <img :src="`${URL_SERVER+category.foto}`" alt="" style="maxWidth: 40px" class="img-fluid">
+                  <span class="pl-1">{{category.nombre}}</span>                    
+                  
+                </b-dropdown-item>
               </b-nav-item-dropdown>
 
               <!-- Administrador -->
@@ -71,7 +73,7 @@
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex'
+import { mapState, mapActions, mapGetters } from 'vuex'
 export default {
   data() {
     return {
@@ -79,12 +81,14 @@ export default {
     }
   },
   computed:{
-    ...mapState(['user', 'session','token', 'getLoading']),
+    ...mapState(['user', 'session','token','URL_SERVER']),
+    ...mapGetters(['getCategories','getLoading']),
   },
   methods:{
-    ...mapActions(['logout','loadToken','getDollarValue','getPesosValue']),
+    ...mapActions(['logout','loadToken','getDollarValue','getPesosValue','consultCategories']),
   },
   created(){
+    this.consultCategories();
   }
 }
 </script>

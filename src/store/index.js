@@ -19,6 +19,10 @@ export default new Vuex.Store({
     currency: {
       dollar: false,
       dollarValue: 0,
+    },
+    categories:{
+      data:[],
+      loading: false,
     }
     
 
@@ -72,7 +76,17 @@ export default new Vuex.Store({
         state.currency.dollarValue = 0;
       }
     },
-    // PRODUCTS
+    // CATEGORIES
+    categoriesLoading(state, payload){
+      if(payload){
+        state.categories.data = payload.data;
+        state.categories.loading = false;
+      }
+      else{
+        state.categories.data = [],
+        state.categories.loading = true;
+      }
+    }
     
   },
   actions: {
@@ -148,6 +162,19 @@ export default new Vuex.Store({
     saveUsers({commit}, payload){
       commit('setUsers', payload);
     },
+    // CATEGORIES
+    consultCategories({state,commit}){
+      commit('categoriesLoading', null);
+      let config = {
+        headers: {'Accept': 'application/json'}
+      }
+      fetch(`${state.URL_SERVER}api/categories?per_page=15`,config)
+      .then(res => res.json())
+      .then(res => {
+        // console.log(res);
+        commit('categoriesLoading',res)
+      })
+    }
 
   },
   modules: {
@@ -177,6 +204,10 @@ export default new Vuex.Store({
         return 'COP'
       }
     },
+    // CATEGORIES
+    getCategories(state){
+      return state.categories;
+    }
 
   },
   
